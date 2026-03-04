@@ -7,10 +7,10 @@ const RECENT_SEARCHES_KEY = "recentSearches";
 
 export default function MainPage() {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState([]);
+  const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [focused, setFocused] = useState(false);
-  const [recentSearches, setRecentSearches] = useState([]);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [loaded, setLoaded] = useState(false);
   const inputRef = useRef(null);
   const router = useRouter();
