@@ -27,8 +27,6 @@ export default function MainPage() {
       display: "flex",
       flexDirection: "column",
       fontFamily: fonts.base,
-      overflow: "hidden",
-      position: "relative",
     }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
@@ -44,28 +42,32 @@ export default function MainPage() {
 
       {/* 배경 효과 */}
       <div style={{
-        position: "absolute", inset: 0, pointerEvents: "none",
+        position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0,
         background: "radial-gradient(ellipse 80% 50% at 50% 0%, rgba(31,111,235,0.12) 0%, transparent 70%)",
       }} />
       <div style={{
-        position: "absolute", top: "20%", left: "10%",
-        width: 400, height: 400,
+        position: "fixed", top: "20%", left: "10%",
+        width: 400, height: 400, zIndex: 0,
         background: "radial-gradient(circle, rgba(31,111,235,0.06) 0%, transparent 70%)",
         borderRadius: "50%", pointerEvents: "none",
         animation: "float 8s ease-in-out infinite",
       }} />
 
       {/* 헤더 */}
-      <div style={{ opacity: loaded ? 1 : 0, transition: "opacity 0.5s ease" }}>
+      <div style={{ position: "relative", zIndex: 50, opacity: loaded ? 1 : 0, transition: "opacity 0.5s ease" }}>
         <Header showSearch={false} />
       </div>
 
       {/* 메인 콘텐츠 */}
       <main style={{
         flex: 1,
-        display: "flex", flexDirection: "column",
-        alignItems: "center", justifyContent: "center",
-        padding: "0 20px 80px", gap: 0,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "0 20px 80px",
+        position: "relative",
+        zIndex: 1,
       }}>
         {/* 타이틀 */}
         <div style={{
@@ -99,20 +101,23 @@ export default function MainPage() {
           </p>
         </div>
 
-        {/* 검색창 */}
+        {/* 검색창 - z-index 높게 */}
         <div style={{
           width: "100%", maxWidth: 560,
           position: "relative",
+          zIndex: 100,
           animation: loaded ? "fadeUp 0.7s ease 0.2s forwards" : "none",
           opacity: loaded ? undefined : 0,
         }}>
           <SearchBar {...search} />
         </div>
 
-        {/* 통계 카드 */}
+        {/* 통계 카드 - z-index 낮게 */}
         <div style={{
           display: "flex", gap: 16, marginTop: 48,
           flexWrap: "wrap", justifyContent: "center",
+          position: "relative",
+          zIndex: 1,
           animation: loaded ? "fadeUp 0.7s ease 0.4s forwards" : "none",
           opacity: loaded ? undefined : 0,
         }}>
