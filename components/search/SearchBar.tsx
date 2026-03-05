@@ -72,7 +72,7 @@ export default function SearchBar({
           onFocus={() => setFocused(true)}
           onBlur={() => setTimeout(() => setFocused(false), 150)}
           onKeyDown={(e) => {
-            if (e.key === "Enter" && results.length > 0) goToApt(results[0].apt_name);
+            if (e.key === "Enter" && results.length > 0) goToApt(results[0].apt_nm);
           }}
           placeholder="아파트 이름을 입력하세요 (예: 래미안, 힐스테이트)"
           style={{
@@ -104,7 +104,7 @@ export default function SearchBar({
           }}>×</button>
         )}
         <button
-          onClick={() => results.length > 0 && goToApt(results[0].apt_name)}
+          onClick={() => results.length > 0 && goToApt(results[0].apt_nm)}
           style={{
             background: colors.gradient.blue,
             border: "none", borderRadius: radius.sm,
@@ -146,15 +146,15 @@ export default function SearchBar({
             </>
           )}
           {query && results.map((apt, i) => (
-            <DropdownItem key={i} onClick={() => goToApt(apt.apt_name)} justify="space-between">
+            <DropdownItem key={i} onClick={() => goToApt(apt.apt_nm)} justify="space-between">
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <span style={{ fontSize: 16 }}>🏢</span>
                 <div>
                   <div style={{ fontSize: 14, color: colors.text.primary, fontWeight: 500 }}>
-                    {apt.apt_name}
+                    {apt.apt_nm}
                   </div>
                   <div style={{ fontSize: 12, color: colors.text.secondary, marginTop: 2 }}>
-                    {apt.dong}
+                    {apt.umd_nm}
                   </div>
                 </div>
               </div>
