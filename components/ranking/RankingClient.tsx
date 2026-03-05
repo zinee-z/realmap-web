@@ -217,7 +217,7 @@ export default function RankingClient({ byTrade, byMax, byRise, byCorp }: Props)
                   {item.apt_nm}
                 </div>
                 <div style={{ fontSize: 12, color: colors.text.secondary }}>
-                  {SGG_NAMES[item.sgg_cd] || item.sgg_cd} · {item.umd_nm}
+                  {SGG_NAMES[item.sgg_cd] ? `${SGG_NAMES[item.sgg_cd]} · ${item.umd_nm}` : item.umd_nm}
                 </div>
               </div>
 
