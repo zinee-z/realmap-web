@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { colors, fonts } from "@/styles/tokens";
 import { useSearch } from "@/hooks/useSearch";
+import { getSidoList, getSggList } from "@/lib/queries";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import SearchBar from "@/components/search/SearchBar";
@@ -13,37 +14,22 @@ const STATS = [
   { label: "데이터 업데이트", value: "매월", icon: "🔄" },
 ];
 
-// 인기 지역 (서울 주요 구)
-const POPULAR_REGIONS = [
-  { code: "11680", name: "강남구",   sido: "11" },
-  { code: "11650", name: "서초구",   sido: "11" },
-  { code: "11710", name: "송파구",   sido: "11" },
-  { code: "11440", name: "마포구",   sido: "11" },
-  { code: "11200", name: "성동구",   sido: "11" },
-  { code: "11380", name: "은평구",   sido: "11" },
-  { code: "11500", name: "강서구",   sido: "11" },
-  { code: "11350", name: "노원구",   sido: "11" },
-];
-
-const SIDO_LIST = [
-  { code: "11", name: "서울" }, { code: "21", name: "부산" },
-  { code: "22", name: "대구" }, { code: "23", name: "인천" },
-  { code: "24", name: "광주" }, { code: "25", name: "대전" },
-  { code: "26", name: "울산" }, { code: "29", name: "세종" },
-  { code: "31", name: "경기" }, { code: "32", name: "강원" },
-  { code: "33", name: "충북" }, { code: "34", name: "충남" },
-  { code: "35", name: "전북" }, { code: "36", name: "전남" },
-  { code: "37", name: "경북" }, { code: "38", name: "경남" },
-  { code: "39", name: "제주" },
-];
-
 export default function MainPage() {
-  const [loaded, setLoaded] = useState<boolean>(false);
+  const [loaded, setLoaded]   = useState<boolean>(false);
+  const [sidoList, setSidoList] = useState<{ sido_cd: string; sido_nm: string }[]>([]);
+  const [popularRegions, setPopularRegions] = useState<{ sgg_cd: string; sgg_nm: string }[]>([]);
   const search = useSearch();
   const router = useRouter();
 
   useEffect(() => {
     setTimeout(() => setLoaded(true), 100);
+    // DB에서 시/도 목록 로드
+    getSidoList().then(setSidoList);
+    // 서울 구/군 목록 로드 (인기 지역용) - 서울 sido_cd 는 DB에서 첫번째 로드 후 가져옴
+    getSidoList().then(list => {
+      const seoul = list.find(s => s.sido_nm === "서울");
+      if (seoul) getSggList(seoul.sido_cd).then(setPopularRegions);
+    });
   }, []);
 
   return (
@@ -194,11 +180,11 @@ export default function MainPage() {
           <div style={{
             display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 24,
           }}>
-            {SIDO_LIST.map(sido => (
+            {sidoList.map(sido => (
               <div
-                key={sido.code}
+                key={sido.sido_cd}
                 className="sido-chip"
-                onClick={() => router.push(`/region/sido/${sido.code}`)}
+                onClick={() => router.push(`/region/sido/${sido.sido_cd}`)}
                 style={{
                   background: "rgba(22,27,34,0.6)",
                   border: `1px solid ${colors.border.default}`,
@@ -208,22 +194,22 @@ export default function MainPage() {
                   backdropFilter: "blur(8px)",
                 }}
               >
-                {sido.name}
+                {sido.sido_nm}
               </div>
             ))}
           </div>
 
-          {/* 인기 지역 카드 */}
+          {/* 인기 지역 카드 (서울 구/군) */}
           <div style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
             gap: 12,
           }}>
-            {POPULAR_REGIONS.map(region => (
+            {popularRegions.slice(0, 8).map(region => (
               <div
-                key={region.code}
+                key={region.sgg_cd}
                 className="region-card"
-                onClick={() => router.push(`/region/${region.code}`)}
+                onClick={() => router.push(`/region/${region.sgg_cd}`)}
                 style={{
                   background: "rgba(22,27,34,0.6)",
                   border: `1px solid ${colors.border.default}`,
@@ -234,7 +220,7 @@ export default function MainPage() {
                 }}
               >
                 <div style={{ fontSize: 20, marginBottom: 8 }}>🏙️</div>
-                <div style={{ fontSize: 14, fontWeight: 700 }}>서울 {region.name}</div>
+                <div style={{ fontSize: 14, fontWeight: 700 }}>서울 {region.sgg_nm}</div>
                 <div style={{ fontSize: 11, color: colors.text.secondary, marginTop: 4 }}>
                   시세 보기 →
                 </div>
