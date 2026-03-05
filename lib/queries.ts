@@ -14,9 +14,8 @@ export async function searchApts(keyword: string): Promise<AptResult[]> {
   return data ?? [];
 }
 
-// ─── 아파트 거래 이력 (deal + dim_apt + dim_region 조인) ─────
+// ─── 아파트 거래 이력 (2단계 쿼리) ──────────────────────────
 export async function getAptTrades(aptNm: string): Promise<Trade[]> {
-  // 1단계: apt_search에서 apt_id 가져오기
   const { data: aptData, error: aptError } = await supabase
     .from("apt_search")
     .select("apt_id, umd_nm, sgg_cd, build_year")
@@ -29,7 +28,6 @@ export async function getAptTrades(aptNm: string): Promise<Trade[]> {
     return [];
   }
 
-  // 2단계: apt_id로 거래 이력 가져오기
   const { data, error } = await supabase
     .from("deal")
     .select("contract_yyyymmdd, price_man, area_x100, floor, trade_type, buyer_type")
@@ -57,7 +55,7 @@ export async function getAptTrades(aptNm: string): Promise<Trade[]> {
   }));
 }
 
-// ─── 지역별 동별 통계 (region_stats 뷰) ──────────────────────
+// ─── 구/군별 동별 통계 (region_stats 뷰) ─────────────────────
 export async function getRegionStats(sggCd: string): Promise<RegionStat[]> {
   const { data, error } = await supabase
     .from("region_stats")
@@ -67,4 +65,27 @@ export async function getRegionStats(sggCd: string): Promise<RegionStat[]> {
 
   if (error) console.error("getRegionStats error:", error);
   return data ?? [];
+}
+
+// ─── 시/도 전체 구/군별 통계 (sido_stats 뷰) ─────────────────
+export async function getSidoStats(sidoCd: string): Promise<RegionStat[]> {
+  const { data, error } = await supabase
+    .from("sido_stats")
+    .select("sgg_cd, avg_price, max_price, min_price, trade_count, last_trade_date")
+    .eq("sido_cd", sidoCd)
+    .order("avg_price", { ascending: false });
+
+  if (error) console.error("getSidoStats error:", error);
+  return data ?? [];
+}
+
+// ─── 아파트 목록 (정적 페이지 생성용) ────────────────────────
+export async function getAllAptNames(): Promise<string[]> {
+  const { data, error } = await supabase
+    .from("apt_search")
+    .select("apt_nm")
+    .limit(30000);
+
+  if (error) console.error("getAllAptNames error:", error);
+  return [...new Set((data ?? []).map((d) => d.apt_nm))];
 }
