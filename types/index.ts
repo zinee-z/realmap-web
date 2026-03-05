@@ -37,9 +37,10 @@ export interface TradeSummary {
   diff: number;
 }
 
-// 지역별 통계
+// 지역별 통계 (region_stats, sido_stats 공용)
 export interface RegionStat {
-  umd_nm: string;
+  umd_nm?: string;   // 동별 (region_stats)
+  sgg_cd?: string;   // 구/군별 (sido_stats)
   avg_price: number;
   max_price: number;
   min_price: number;
