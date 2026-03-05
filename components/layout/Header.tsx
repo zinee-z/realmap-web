@@ -50,6 +50,7 @@ export default function Header({ showSearch = false }: HeaderProps) {
       <div style={{ display: "flex", gap: 4, marginLeft: 8 }}>
         {[
           { label: "랭킹", path: "/ranking" },
+          { label: "최근 실거래", path: "/recent" },
           { label: "지역별 시세", path: "/region/sido/11" },
         ].map(nav => (
           <button key={nav.path} onClick={() => router.push(nav.path)} style={{

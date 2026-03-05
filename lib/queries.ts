@@ -155,3 +155,28 @@ export async function getAllAptNames(): Promise<string[]> {
   if (error) console.error("getAllAptNames error:", error);
   return [...new Set((data ?? []).map((d) => d.apt_nm))];
 }
+
+// ─── 최근 실거래 피드 ─────────────────────────────────────────
+export interface RecentTrade {
+  apt_nm: string;
+  sgg_cd: string;
+  sgg_nm: string;
+  sido_nm: string;
+  umd_nm: string;
+  price_man: number;
+  area: number;
+  floor: number;
+  trade_type: number;
+  contract_yyyymmdd: number;
+}
+
+export async function getRecentTrades(limit = 50): Promise<RecentTrade[]> {
+  const { data, error } = await supabase
+    .from("recent_trades")
+    .select("*")
+    .order("contract_yyyymmdd", { ascending: false })
+    .limit(limit);
+
+  if (error) console.error("getRecentTrades error:", error);
+  return data ?? [];
+}
