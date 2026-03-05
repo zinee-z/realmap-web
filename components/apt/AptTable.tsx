@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Trade } from "@/types";
 import { colors, radius } from "@/styles/tokens";
-import { formatPrice } from "./utils";
+import { formatPrice, formatDate, tradeTypeLabel, buyerTypeLabel } from "./utils";
 
 export default function AptTable({ trades }: { trades: Trade[] }) {
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
@@ -18,10 +18,10 @@ export default function AptTable({ trades }: { trades: Trade[] }) {
       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
         <thead>
           <tr style={{ borderTop: `1px solid ${colors.border.default}`, borderBottom: `1px solid ${colors.border.default}` }}>
-            {["거래일", "면적", "층", "거래가", "㎡당"].map(h => (
+            {["거래일", "면적", "층", "거래가", "거래유형", "매수자"].map(h => (
               <th key={h} style={{
-                padding: "10px 20px",
-                textAlign: (h === "거래가" || h === "㎡당") ? "right" : "left",
+                padding: "10px 16px",
+                textAlign: h === "거래가" ? "right" : "left",
                 color: colors.text.secondary, fontWeight: 500, fontSize: 12,
               }}>{h}</th>
             ))}
@@ -37,14 +37,23 @@ export default function AptTable({ trades }: { trades: Trade[] }) {
                 background: hoveredRow === i ? colors.bg.hover : "transparent",
                 transition: "background 0.1s",
               }}>
-              <td style={{ padding: "12px 20px", color: colors.text.secondary }}>{t.deal_date}</td>
-              <td style={{ padding: "12px 20px" }}>{t.area}㎡</td>
-              <td style={{ padding: "12px 20px", color: colors.text.secondary }}>{t.floor}층</td>
-              <td style={{ padding: "12px 20px", textAlign: "right", fontWeight: 700, color: colors.text.accent }}>
-                {formatPrice(t.price)}
+              <td style={{ padding: "12px 16px", color: colors.text.secondary }}>{formatDate(t.contract_yyyymmdd)}</td>
+              <td style={{ padding: "12px 16px" }}>{Math.round(t.area)}㎡</td>
+              <td style={{ padding: "12px 16px", color: colors.text.secondary }}>{t.floor}층</td>
+              <td style={{ padding: "12px 16px", textAlign: "right", fontWeight: 700, color: colors.text.accent }}>
+                {formatPrice(t.price_man)}
               </td>
-              <td style={{ padding: "12px 20px", textAlign: "right", color: colors.text.secondary, fontSize: 12 }}>
-                {t.price_per_m2 ? `${t.price_per_m2.toLocaleString()}만` : "-"}
+              <td style={{ padding: "12px 16px" }}>
+                <span style={{
+                  background: t.trade_type === 0 ? "rgba(63,185,80,0.1)" : "rgba(88,166,255,0.1)",
+                  color: t.trade_type === 0 ? colors.status.up : colors.text.accent,
+                  borderRadius: 4, padding: "2px 6px", fontSize: 11,
+                }}>
+                  {tradeTypeLabel(t.trade_type)}
+                </span>
+              </td>
+              <td style={{ padding: "12px 16px", color: colors.text.secondary, fontSize: 12 }}>
+                {buyerTypeLabel(t.buyer_type)}
               </td>
             </tr>
           ))}

@@ -2,6 +2,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Trade, ChartData, TradeSummary } from "@/types";
 import { colors, fonts } from "@/styles/tokens";
+import { formatPrice, formatYearMonth } from "./utils";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import AptHeader from "./AptHeader";
@@ -11,17 +12,17 @@ import AptTable from "./AptTable";
 import AdBanner from "@/components/ui/AdBanner";
 
 interface Props {
-  aptName: string;
+  aptNm: string;
   trades: Trade[];
 }
 
-export default function AptDetailClient({ aptName, trades }: Props) {
+export default function AptDetailClient({ aptNm, trades }: Props) {
   const [selectedArea, setSelectedArea] = useState<string>("전체");
-  const [loaded, setLoaded] = useState<boolean>(false);
+  const [loaded, setLoaded]             = useState<boolean>(false);
 
   useEffect(() => { setTimeout(() => setLoaded(true), 100); }, []);
 
-  // 면적 목록
+  // 면적 목록 동적 생성
   const areas = useMemo(() =>
     [...new Set(trades.map(t => `${Math.round(t.area)}㎡`))].sort(),
     [trades]
@@ -38,9 +39,9 @@ export default function AptDetailClient({ aptName, trades }: Props) {
   // 차트 데이터 (월별 평균)
   const chartData: ChartData[] = useMemo(() => {
     const grouped = filtered.reduce<Record<string, { total: number; count: number }>>((acc, t) => {
-      const month = t.deal_date?.slice(0, 7) || "";
+      const month = formatYearMonth(t.contract_yyyymmdd);
       if (!acc[month]) acc[month] = { total: 0, count: 0 };
-      acc[month].total += t.price;
+      acc[month].total += t.price_man;
       acc[month].count += 1;
       return acc;
     }, {});
@@ -58,11 +59,11 @@ export default function AptDetailClient({ aptName, trades }: Props) {
     const latest = chartData[chartData.length - 1] ?? null;
     const prev   = chartData[chartData.length - 2] ?? null;
     return {
-      avg:    filtered.length ? Math.round(filtered.reduce((s, t) => s + t.price, 0) / filtered.length) : 0,
-      max:    filtered.length ? Math.max(...filtered.map(t => t.price)) : 0,
-      count:  filtered.length,
+      avg:   filtered.length ? Math.round(filtered.reduce((s, t) => s + t.price_man, 0) / filtered.length) : 0,
+      max:   filtered.length ? Math.max(...filtered.map(t => t.price_man)) : 0,
+      count: filtered.length,
       latest, prev,
-      diff:   latest && prev ? latest.price - prev.price : 0,
+      diff:  latest && prev ? latest.price - prev.price : 0,
     };
   }, [filtered, chartData]);
 
@@ -84,13 +85,8 @@ export default function AptDetailClient({ aptName, trades }: Props) {
         transform: loaded ? "translateY(0)" : "translateY(16px)",
         transition: "all 0.5s cubic-bezier(0.16,1,0.3,1)",
       }}>
-        {/* 아파트 헤더 */}
-        <AptHeader
-          aptName={aptName}
-          trades={trades}
-          summary={summary}
-          areas={areas}
-        />
+        {/* 아파트 헤더 + 같은 지역 버튼 */}
+        <AptHeader aptNm={aptNm} trades={trades} summary={summary} areas={areas} />
 
         {/* 요약 카드 */}
         {filtered.length > 0 && <AptSummary summary={summary} />}
@@ -110,8 +106,7 @@ export default function AptDetailClient({ aptName, trades }: Props) {
               <button key={a} onClick={() => setSelectedArea(a)} style={{
                 background: selectedArea === a ? "#1f6feb" : colors.bg.secondary,
                 border: `1px solid ${selectedArea === a ? colors.border.active : colors.border.subtle}`,
-                borderRadius: 20, padding: "6px 14px",
-                fontSize: 13,
+                borderRadius: 20, padding: "6px 14px", fontSize: 13,
                 color: selectedArea === a ? "#fff" : colors.text.secondary,
                 cursor: "pointer", transition: "all 0.15s",
                 fontWeight: selectedArea === a ? 600 : 400,
@@ -123,10 +118,9 @@ export default function AptDetailClient({ aptName, trades }: Props) {
         {/* 차트 */}
         {chartData.length > 0 && <AptChart chartData={chartData} avg={summary.avg} />}
 
-        {/* 거래 이력 */}
+        {/* 거래 이력 테이블 */}
         {filtered.length > 0 && <AptTable trades={filtered} />}
 
-        {/* 광고 */}
         <AdBanner />
 
         {/* SEO 텍스트 */}
@@ -138,10 +132,10 @@ export default function AptDetailClient({ aptName, trades }: Props) {
           lineHeight: 1.8, color: colors.text.secondary,
         }}>
           <h2 style={{ fontSize: 15, fontWeight: 700, color: colors.text.primary, marginTop: 0, marginBottom: 12 }}>
-            {aptName} 실거래가 분석
+            {aptNm} 실거래가 분석
           </h2>
           <p style={{ margin: 0 }}>
-            {aptName}의 최근 실거래가는{" "}
+            {aptNm}의 최근 평균 거래가는{" "}
             <strong style={{ color: colors.text.accent }}>
               {summary.latest ? formatPrice(summary.latest.price) : "-"}
             </strong>이며,
@@ -157,10 +151,4 @@ export default function AptDetailClient({ aptName, trades }: Props) {
       <Footer />
     </div>
   );
-}
-
-function formatPrice(val: number): string {
-  if (!val) return "-";
-  if (val >= 10000) return `${(val / 10000).toFixed(1)}억`;
-  return `${val.toLocaleString()}만`;
 }

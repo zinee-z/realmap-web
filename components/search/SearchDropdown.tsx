@@ -10,6 +10,30 @@ interface SearchDropdownProps {
   goToApt: (name: string) => void;
 }
 
+function DropdownItem({
+  children, onClick, justify = "flex-start",
+}: {
+  children: React.ReactNode;
+  onClick: () => void;
+  justify?: string;
+}) {
+  return (
+    <div
+      onClick={onClick}
+      style={{
+        padding: "12px 20px", cursor: "pointer",
+        display: "flex", alignItems: "center",
+        justifyContent: justify, gap: 10,
+        transition: "background 0.1s",
+      }}
+      onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(31,111,235,0.1)")}
+      onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+    >
+      {children}
+    </div>
+  );
+}
+
 export default function SearchDropdown({
   query, results, loading, recentSearches, goToApt,
 }: SearchDropdownProps) {
@@ -43,15 +67,15 @@ export default function SearchDropdown({
 
       {/* 검색 결과 */}
       {query && results.map((apt, i) => (
-        <DropdownItem key={i} onClick={() => goToApt(apt.apt_name)} justify="space-between">
+        <DropdownItem key={i} onClick={() => goToApt(apt.apt_nm)} justify="space-between">
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <span style={{ fontSize: 16 }}>🏢</span>
             <div>
               <div style={{ fontSize: 14, color: colors.text.primary, fontWeight: 500 }}>
-                {apt.apt_name}
+                {apt.apt_nm}
               </div>
               <div style={{ fontSize: 12, color: colors.text.secondary, marginTop: 2 }}>
-                {apt.dong}
+                {apt.umd_nm} · {apt.build_year}년
               </div>
             </div>
           </div>
@@ -65,31 +89,6 @@ export default function SearchDropdown({
           검색 결과가 없어요
         </div>
       )}
-    </div>
-  );
-}
-
-// 드롭다운 아이템 공통 컴포넌트
-function DropdownItem({
-  children, onClick, justify = "flex-start",
-}: {
-  children: React.ReactNode;
-  onClick: () => void;
-  justify?: string;
-}) {
-  return (
-    <div
-      onClick={onClick}
-      style={{
-        padding: "12px 20px", cursor: "pointer",
-        display: "flex", alignItems: "center",
-        justifyContent: justify, gap: 10,
-        transition: "background 0.1s",
-      }}
-      onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(31,111,235,0.1)")}
-      onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
-    >
-      {children}
     </div>
   );
 }
