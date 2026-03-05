@@ -7,10 +7,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import AdBanner from "@/components/ui/AdBanner";
 import RegionSelector from "./RegionSelector";
-<<<<<<< HEAD
 import { SGG_NAMES } from "./constants";
-=======
->>>>>>> a693db0b91e40a2b51e4ca777f96eec51b8e55f5
 
 // ─── 유틸 ────────────────────────────────────────────────────
 const formatPrice = (val: number): string => {
